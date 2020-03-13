@@ -1,15 +1,59 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import React, { Component } from "react";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  View,
+  Text
+} from "react-native";
 
-const Login = () => {
-  return (
-    <View>
-      <TextInput placeholder="Email" style={styles.textInput} />
-      <TextInput placeholder="Password" style={styles.textInput} />
-    </View>
-  );
-};
+import firebase from "../config/firebaseConfig";
+
+export class Login extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: "",
+      password: ""
+    };
+  }
+
+  loginUser = (email, password) => {
+    try {
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then(function(user) {
+          console.log(user);
+        });
+    } catch (error) {
+      console.log(error.toString());
+    }
+  };
+  render() {
+    return (
+      <View>
+        <TextInput
+          placeholder="Email"
+          style={styles.textInput}
+          onChangeText={email => this.setState({ email })}
+        />
+        <TextInput
+          placeholder="Password"
+          style={styles.textInput}
+          onChangeText={password => this.setState({ password })}
+        />
+
+        <TouchableOpacity
+          onPress={() => this.loginUser(this.state.email, this.state.password)}
+          style={styles.button}
+        >
+          <Text>Login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+}
 
 export default Login;
 
@@ -22,5 +66,9 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     marginVertical: 5,
     borderColor: "rgba(0,0,0,0.2)"
+  },
+  button: {
+    alignItems: "center",
+    padding: 10
   }
 });

@@ -1,5 +1,13 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity
+} from "react-native";
+import firebase from "../config/firebaseConfig";
+import * as Facebook from "expo-facebook";
 
 import Animated, { Easing } from "react-native-reanimated";
 import { TapGestureHandler, State } from "react-native-gesture-handler";
@@ -58,6 +66,7 @@ class CakeApp extends Component {
   constructor() {
     super();
 
+    // Animations
     this.buttonOpacity = new Value(1);
 
     this.onStateChange = event([
@@ -120,6 +129,29 @@ class CakeApp extends Component {
       extrapolate: Extrapolate.CLAMP
     });
   }
+
+  // Facebook Login
+  componentDidMount() {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user != null) {
+        console.log(user);
+      }
+    });
+  }
+
+  async loginWithFacebook() {
+    await Facebook.initializeAsync("210495076874661");
+    const { type, token } = await Facebook.logInWithReadPermissionsAsync({
+      permissions: ["public_profile"]
+    });
+    if (type == "success") {
+      const credential = firebase.auth.FacebookAuthProvider.credential(token);
+      firebase
+        .auth()
+        .signInWithCredential(credential)
+        .catch(error => console.log(error));
+    }
+  }
   render() {
     return (
       <View
@@ -168,9 +200,13 @@ class CakeApp extends Component {
               transform: [{ translateY: this.buttonY }]
             }}
           >
-            <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
-              SIGN IN WITH FACEBOOK
-            </Text>
+            <TouchableOpacity onPress={() => this.loginWithFacebook()}>
+              <Text
+                style={{ fontSize: 20, fontWeight: "bold", color: "white" }}
+              >
+                SIGN IN WITH FACEBOOK
+              </Text>
+            </TouchableOpacity>
           </Animated.View>
           <Animated.View
             style={{
